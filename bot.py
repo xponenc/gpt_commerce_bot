@@ -3,7 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
-from handlers import handlers_courses, handlers_start, handlers_menu_options_inline, handlers_psychologist
+from handlers import handlers_gpt
 import os
 
 
@@ -25,11 +25,12 @@ dp = Dispatcher(storage=MemoryStorage())
 
 # Включаем маршрутизаторы (роутеры) команд и обработчиков в объект dp для обработки входящих сообщений
 dp.include_routers(
-    handlers_start.router,
+    handlers_gpt.gpt_router,
+    # handlers_start.router,
     # handlers_menu_options.router,
-    handlers_menu_options_inline.router,
-    handlers_courses.router,
-    handlers_psychologist.router,
+    # handlers_menu_options_inline.router,
+    # handlers_courses.router,
+    # handlers_psychologist.router,
 )
 
 

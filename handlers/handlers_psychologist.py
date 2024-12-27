@@ -3,6 +3,8 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+
+from keyboards.keyboards import start_dialog_keyboard
 from keyboards.keyboards_db import *
 from sqlalchemy import select
 from db_start import async_session

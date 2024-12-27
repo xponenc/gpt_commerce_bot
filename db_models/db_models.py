@@ -1,6 +1,6 @@
 from datetime import datetime
-from pipsqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Boolean, String, Numeric, TIMESTAMP, JSON, BigInteger
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Boolean, String, Numeric, TIMESTAMP, JSON, BigInteger, Column
 import os
 from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -204,11 +204,13 @@ class PaymentRecord(Base):
 # Модель таблицы История сообщений
 class GPTHistory(Base):
     __tablename__ = 'gpt_history'
-    id: Mapped[Optional[int]] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    date_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime)
-    is_bot_msg: Mapped[bool] = mapped_column(Boolean, nullable=True, default=True)
-    message: Mapped[str] = mapped_column(Text, nullable=False)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=False)
+    date_time = Column(DateTime, default=datetime.utcnow, nullable=False)
+    is_bot_msg = Column(Boolean, nullable=False, default=False)
+    message = Column(String, nullable=False)
+
 
 # ********************************************************************
 # Создание базы данных на основании моделей
@@ -242,6 +244,8 @@ async def create_db():
 async def create_table_by_name(table_name: str):
     engine = await get_async_engine()
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
         # Получаем объект таблицы по имени
         table = Base.metadata.tables[table_name]
         # Создаем таблицу
@@ -258,7 +262,7 @@ async def clear_table(table_name: str):
 
 
 if __name__ == "__main__":
-    confirm = input("Выполнить первичное создание ДБ? y/n")
+    confirm = input("Выполнить первичное создание ДБ? y/n: ")
     if confirm.lower() == "y":
         # asyncio.run(create_db())
         asyncio.run(create_table_by_name('gpt_history'))
