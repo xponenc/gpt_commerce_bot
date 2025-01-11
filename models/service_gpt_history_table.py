@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from db_models.db_models import GPTHistory
-from db_start import async_session
+from services.db import async_session
 
 
 async def write_data_to_table(data: list):

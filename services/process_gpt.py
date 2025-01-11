@@ -3,7 +3,7 @@ from typing import Optional
 from openai import OpenAI, PermissionDeniedError
 
 
-def gpt_chat(user_msg: str, system_prompt: str = None):
+def gpt_chat(user_msg: str, system_prompt: str = None, model_temperature: float = 0):
     client = OpenAI()
     if not system_prompt:
         system_prompt = "Будь приветлив и краток"
@@ -13,7 +13,7 @@ def gpt_chat(user_msg: str, system_prompt: str = None):
             messages=[{"role": "system", "content": system_prompt},
                       {"role": "user", "content": user_msg}
                       ],
-            temperature=0,
+            temperature=model_temperature,
         )
         answer = stream.choices[0].message.content
         return answer
