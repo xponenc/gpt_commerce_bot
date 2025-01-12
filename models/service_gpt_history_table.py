@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from db_models.db_models import GPTHistory
+from models.db_models import GPTHistory
 from services.db import async_session
 
 

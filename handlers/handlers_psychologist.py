@@ -7,8 +7,28 @@ from aiogram.fsm.state import State, StatesGroup
 from keyboards.keyboards import start_dialog_keyboard
 from keyboards.keyboards_db import *
 from sqlalchemy import select
-from db_start import async_session
-from db_models import Psychologist
+
+from models.db_models import Psychologist
+from services.db import async_session
+
+
+PSYCHOLOGIST_COMMANDS = {
+    "courses": {
+        "name": "Курсы по психологии",
+        "info": "1. 📚 - Курсы по психологии: Ознакомьтесь с доступными курсами"},
+    "personal_psychologist": {
+        "name": "Личный психолог",
+        "info": "2. 🧑 - Личный психолог: Общайтесь с виртуальным психологом"},
+    "payment": {
+        "name": "Оплата и кредиты",
+        "info": "3. 💳 - Оплата и кредиты: Просмотрите информацию об оплате и кредитах"},
+    "options": {
+        "name": "Настройки",
+        "info": "4. ⚙️ - Изменить настройки: Измените настройки вашего профиля"},
+    "support": {
+        "name": "Тех. поддержка",
+        "info": "5. 🆘 - Тех.поддержка: Обратитесь за технической поддержкой"},
+}
 
 
 # Класс, описывающий состояния

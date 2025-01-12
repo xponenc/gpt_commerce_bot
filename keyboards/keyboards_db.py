@@ -1,13 +1,16 @@
 from collections import OrderedDict
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 from sqlalchemy import select
-from db_start import (async_session, courses_table, lessons_table,
-                      psychologists_table)
+from sqlalchemy.exc import ProgrammingError
+
+from services.db import (async_session, courses_table, lessons_table,
+                         psychologists_table)
+from services.loggers import logger
 
 
 def reply_keyboard(buttons_list: list,  # Спискок названий кнопок
-                   adj: int,            # Устанавливаем к-во кнопок в ряд
-                   placeholder: str):   # Подсказка для поля ввода
+                   adj: int,  # Устанавливаем к-во кнопок в ряд
+                   placeholder: str):  # Подсказка для поля ввода
     builder = ReplyKeyboardBuilder()
     for button in buttons_list:
         builder.button(text=button)
@@ -21,10 +24,14 @@ def reply_keyboard(buttons_list: list,  # Спискок названий кно
 # Клавиатура категорий курсов из базы данных
 async def categories_keyboard():
     async with async_session() as session:  # Открываем асинхронный контекст для сессии
-        result = await session.execute(select(courses_table.c.category).
-                                       distinct().order_by(courses_table.c.category))
-        buttons = result.scalars().all()  # Извлекаем список категорий
-    return reply_keyboard(buttons, 2, "Выберите категорию курсов")
+        try:
+            result = await session.execute(select(courses_table.c.category).
+                                           distinct().order_by(courses_table.c.category))
+            buttons = result.scalars().all()  # Извлекаем список категорий
+            return reply_keyboard(buttons, 2, "Выберите категорию курсов")
+
+        except ProgrammingError as e:
+            logger.critical(e)
 
 
 # Клавиатура для курсов из базы данных на основе выбранной категории

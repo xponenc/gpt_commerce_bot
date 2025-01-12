@@ -1,21 +1,14 @@
-from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Boolean, String, Numeric, TIMESTAMP, JSON, BigInteger, Column
-import os
-from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from datetime import datetime  
+from sqlalchemy import Column
 from sqlalchemy import (DateTime, BigInteger, Text, ForeignKey, Integer, String,
-                        Boolean, TIMESTAMP, Numeric, JSON, Date, Double, text)
+                        Boolean, TIMESTAMP, Numeric, JSON, Date, Double)
 from sqlalchemy.orm import mapped_column, Mapped, DeclarativeBase, relationship
 from datetime import datetime, date
 from typing import Optional, List
-import asyncio
 
 
-# Создаем базовый класс для декларативного стиля SQLAlchemy, который будет служить основой для других моделей.
+# Создаем базовый класс для декларативного стиля SQLAlchemy,
 class Base(DeclarativeBase):
-    pass  # Класс не содержит дополнительных атрибутов или методов
+    pass
 
 
 # Модель таблицы "users"
@@ -210,60 +203,3 @@ class GPTHistory(Base):
     date_time = Column(DateTime, default=datetime.utcnow, nullable=False)
     is_bot_msg = Column(Boolean, nullable=False, default=False)
     message = Column(String, nullable=False)
-
-
-# ********************************************************************
-# Создание базы данных на основании моделей
-load_dotenv()
-DB_USER = os.getenv('DB_USER')
-DB_PASS = os.getenv('DB_PASS')
-DB_HOST = os.getenv('DB_HOST')
-DB_PORT = os.getenv('DB_PORT')
-DB_NAME = os.getenv('DB_NAME')
-
-DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-
-# Асинхронная функция для получения асинхронного движка базы данных
-async def get_async_engine():
-    # Создаем и возвращаем асинхронный движок с URL из настроек
-    return create_async_engine(url=DATABASE_URL, echo=False)
-
-
-# Асинхронная функция для создания базы данных
-async def create_db():
-    engine = await get_async_engine()  # Получаем асинхронный движок базы данных
-    async with engine.begin() as conn:  # Открываем асинхронный контекст для начала транзакции
-        # Удаляем все таблицы из базы данных
-        await conn.run_sync(Base.metadata.drop_all)
-        # Создаем все таблицы на основе метаданных
-        await conn.run_sync(Base.metadata.create_all)
-
-
-# Асинхронная функция для создания отдельных таблиц
-async def create_table_by_name(table_name: str):
-    engine = await get_async_engine()
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-
-        # Получаем объект таблицы по имени
-        table = Base.metadata.tables[table_name]
-        # Создаем таблицу
-        await conn.run_sync(table.create)
-
-
-# Очистка таблицы (удаление строк)
-async def clear_table(table_name: str):
-    engine = await get_async_engine()
-    async with engine.begin() as conn:
-        # Используем SQL выражение через `text`
-        query = text(f"TRUNCATE TABLE {table_name} RESTART IDENTITY CASCADE")
-        await conn.execute(query)
-
-
-if __name__ == "__main__":
-    confirm = input("Выполнить первичное создание ДБ? y/n: ")
-    if confirm.lower() == "y":
-        # asyncio.run(create_db())
-        asyncio.run(create_table_by_name('gpt_history'))
-        # asyncio.run(clear_table('payment_records'))

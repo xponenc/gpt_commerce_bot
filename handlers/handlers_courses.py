@@ -3,9 +3,10 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+
+from keyboards.keyboards import get_back_inline_keyboard
 from keyboards.keyboards_db import *
 from sqlalchemy import select
-from db_start import async_session, courses_table, lessons_table
 
 
 # Класс, описывающий состояния
@@ -13,14 +14,15 @@ class CategoryState(StatesGroup):
     choosing_category = State()
     choosing_course = State()
     choosing_lesson = State()
+    navigating_lesson = State()
 
 
 # Создание экземпляра класса Router, который будет управлять маршрутами
-router = Router()
+courses_router = Router()
 
 
 # /courses
-@router.message(Command('courses'))
+@courses_router.message(Command('courses'))
 async def cmd_courses(message: Message, state: FSMContext):
     await state.clear()
     await message.answer("👁️ Выберите категорию курсов для обучения:",
@@ -30,7 +32,7 @@ async def cmd_courses(message: Message, state: FSMContext):
 
 
 # Обработчик выбора категории
-@router.message(~F.text.startswith('/'), CategoryState.choosing_category)
+@courses_router.message(~F.text.startswith('/'), CategoryState.choosing_category)
 async def process_category(message: Message, state: FSMContext):
     await state.update_data(choosing_category=message.text)
     await message.answer("---", reply_markup=get_back_inline_keyboard())
@@ -41,7 +43,7 @@ async def process_category(message: Message, state: FSMContext):
 
 
 # Обработчик выбора курса внутри категории
-@router.message(~F.text.startswith('/'), CategoryState.choosing_course)
+@courses_router.message(~F.text.startswith('/'), CategoryState.choosing_course)
 async def process_course(message: Message, state: FSMContext):
     await state.update_data(choosing_course=message.text)
 
@@ -49,6 +51,8 @@ async def process_course(message: Message, state: FSMContext):
         # Описание курса из таблицы базы данных
         result = await session.execute(select(courses_table.c.description).
                                        where(courses_table.c.course_name == message.text))
+        print(result)
+        print(result.scalars())
     await message.answer(result.scalars().all()[0],
                          reply_markup=get_back_inline_keyboard())
 
@@ -59,7 +63,7 @@ async def process_course(message: Message, state: FSMContext):
 
 
 # Обработчик выбора урока
-@router.message(~F.text.startswith('/'), CategoryState.choosing_lesson)
+@courses_router.message(~F.text.startswith('/'), CategoryState.choosing_lesson)
 async def process_lesson(message: Message, state: FSMContext):
     await state.update_data(choosing_lesson=message.text)
     data = await state.get_data()
@@ -88,7 +92,7 @@ async def process_lesson(message: Message, state: FSMContext):
 
 
 # ---------------------------------------------------------------------------------
-@router.callback_query(F.data.startswith("part_lesson_"))
+@courses_router.callback_query(F.data.startswith("part_lesson_"))
 async def lesson_navigation_callback(callback_query: CallbackQuery, state: FSMContext):
     data = await state.get_data()  # Считываем данные состояния
     choosing_course = data.get('choosing_course')
@@ -143,7 +147,7 @@ async def lesson_navigation_callback(callback_query: CallbackQuery, state: FSMCo
     await callback_query.answer()
 
 
-@ router.callback_query(F.data == "back")
+@courses_router.callback_query(F.data == "back")
 async def back_menu(callback_query: CallbackQuery, state: FSMContext):
     # Получаем текущее состояние пользователя
     current_state = await state.get_state()

@@ -6,7 +6,8 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 # Клавиатура для изменения настроек (Reply версия) -------------------------------
 def options_keyboard():
     builder = ReplyKeyboardBuilder()
-    buttons = ["📝 Изменить имя",
+    buttons = ["📝 Посмотреть действующие опции",
+               "📝 Изменить имя",
                "🎚️ Изменить скорость звука",
                "🌡️ Изменить температуру",
                "🎧 Аудио ответы в чатах",
@@ -130,7 +131,7 @@ def start_inline_keyboard():
                                                callback_data="start")]])
 
 
-# Peply клавиатура с кнопкой "Назад"
+# Reply клавиатура с кнопкой "Назад"
 def get_back_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[[KeyboardButton(text="🔙 Назад")]],
