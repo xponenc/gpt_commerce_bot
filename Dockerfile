@@ -5,7 +5,7 @@ FROM python:3.12
 WORKDIR /projects/gpt_commercial_bot
 
 # Скопируйте файлы требований и установите зависимости
-COPY req ./
+COPY req.txt ./
 RUN apt update -y
 RUN apt install ffmpeg -y
 RUN pip install --upgrade pip
