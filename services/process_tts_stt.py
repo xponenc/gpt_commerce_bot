@@ -28,6 +28,7 @@ load_dotenv()
 api_key_yandex = os.getenv('YANDEX_API_KEY')
 folder_id_yandex = os.getenv('YANDEX_FOLDER_ID')
 
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 client = OpenAI()
 
 
