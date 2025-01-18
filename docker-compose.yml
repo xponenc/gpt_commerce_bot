@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gpt-bot:v1
+    container_name: gpt-bot
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - /project/gpt_commercial_bot:/proj/gpt_bot
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - gpt_network
+
+  db:
+    image: postgres:17.2
+    container_name: postgres
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
+      interval: 10s
+      retries: 5
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - psy_db_data:/proj/psy_data
+    restart: unless-stopped
+    networks:
+      - gpt_network
+
+networks:
+  gpt_network:
+
+
+volumes:
+  gpt_db_data:
