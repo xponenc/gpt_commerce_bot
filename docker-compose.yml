@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: psy-bot:v1
+    container_name: psy-bot
     environment:
       - DB_HOST=db
       - DB_PORT=5432
@@ -13,10 +15,12 @@ services:
       - DB_NAME=${DB_NAME}
       - PYTHONUNBUFFERED=1
     volumes:
+      - /project/gtp_commercial_bot:/proj/psy_bot
     depends_on:
       - db
     restart: unless-stopped
     networks:
+      - psy_network
 
   db:
     image: postgres:17.2
@@ -35,8 +39,11 @@ services:
       - psy_db_data:/proj/psy_data
     restart: unless-stopped
     networks:
+      - psy_network
 
 networks:
+  psy_network:
 
 
 volumes:
+  psy_db_data:
